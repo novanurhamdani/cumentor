@@ -14,10 +14,8 @@ export async function uploadToS3(file: File) {
       region: process.env.NEXT_PUBLIC_S3_REGION,
     });
 
-    const file_key = `uploads/${Date.now().toString()}-${file.name.replace(
-      " ",
-      "_"
-    )}`;
+    const file_key =
+      "uploads/" + Date.now().toString() + file.name.replace(" ", "-");
 
     const params = {
       Bucket: process.env.NEXT_PUBLIC_S3_BUCKET_NAME!,
@@ -30,7 +28,7 @@ export async function uploadToS3(file: File) {
       .on("httpUploadProgress", (progress) => {
         console.log(
           `Uploaded ${progress.loaded} bytes of ${progress.total}`,
-          parseInt(((progress.loaded * 100) / progress.total).toString(0))
+          parseInt(((progress.loaded * 100) / progress.total).toString())
         );
       })
       .promise();

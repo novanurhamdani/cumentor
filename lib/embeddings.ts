@@ -1,21 +1,31 @@
-import { OpenAIApi, Configuration } from "openai-edge";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const config = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
-const openai = new OpenAIApi(config);
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
 
 export async function getEmbeddings(text: string) {
+  if (!process.env.GOOGLE_API_KEY) {
+    throw new Error("GOOGLE_API_KEY is not set in environment variables");
+  }
+
   try {
-    const response = await openai.createEmbedding({
-      model: "text-embedding-ada-002",
-      input: text.replace(/\n/g, " "),
-    });
-    const result = await response.json();
-    return result.data[0].embedding as number[];
+    const model = genAI.getGenerativeModel({ model: "embedding-001" });
+    const result = await model.embedContent(text.replace(/\n/g, " "));
+    const embedding = await result.embedding;
+
+    if (!embedding || !embedding.values) {
+      throw new Error("Received empty embedding from Google AI API");
+    }
+
+    // Convert Float32Array to regular array
+    const embedArray = Array.from(embedding.values);
+
+    if (embedArray.length === 0) {
+      throw new Error("Failed to get valid embedding array");
+    }
+
+    return embedArray;
   } catch (error) {
-    console.log("error calling openai embeddings api", error);
+    console.error("Error in getEmbeddings:", error);
     throw error;
   }
 }

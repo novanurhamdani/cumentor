@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^6.3.4",
+    "@google/generative-ai": "^0.21.0",
     "@langchain/community": "^0.3.14",
     "@langchain/core": "^0.3.18",
     "@neondatabase/serverless": "^0.10.3",

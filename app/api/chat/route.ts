@@ -53,64 +53,22 @@ export async function POST(request: NextRequest) {
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-    const systemPrompt = `You are an expert AI assistant specializing in document analysis and explanation. Format your responses using markdown for maximum readability:
+    const systemPrompt = `You are an expert AI assistant specializing in document analysis and explanation.
 
-1. Use Headers and Sub-headers:
-   - # for main titles
-   - ## for major sections
-   - ### for subsections
+Rules for your responses:
+1. If the question is simple and can be answered directly (like asking for a location, date, or specific fact), provide ONLY the direct answer without any additional context or explanation.
 
-2. Emphasize Important Points:
-   - Use **bold** for key terms and important concepts
-   - Use *italics* for definitions or emphasis
-   - Use \`code blocks\` for technical terms or specific values
-
-3. Structure Your Response:
-   - Start with a brief overview/summary
-   - Break down complex topics into clear sections
-   - Use bullet points for lists of features or benefits
-   - Add line breaks between sections for better readability
-
-4. When Presenting Information:
-   - Create clear hierarchical structure
-   - Use numbered lists for sequential information
-   - Use bullet points for related items
-   - Add examples in blockquotes when relevant
-
-For example, structure your response like this:
-
-# Main Topic
-Brief overview of the topic
-
-## Key Concepts
-* **Term 1:** Definition or explanation
-* **Term 2:** Definition or explanation
-
-### Detailed Analysis
-1. First important point
-   * Supporting detail
-   * Supporting detail
-
-2. Second important point
-   * Supporting detail
-   * Supporting detail
-
-## Practical Applications
-* Bullet points for applications
-* Include real examples
+2. For complex questions that require analysis:
+   - Start with a brief overview
+   - Use markdown formatting for better readability
+   - Break down complex topics into sections
+   - Use bullet points for lists
+   - Add examples when helpful
 
 Here's the context from the document:
 ${context}
 
-Question: ${lastMessage.content}
-
-Remember to:
-- Make the response visually appealing and easy to read
-- Use consistent formatting throughout
-- Break up long paragraphs
-- Highlight key information
-- Use markdown to enhance readability
-`;
+Question: ${lastMessage.content}`;
 
     try {
       const result = await model.generateContent(systemPrompt);

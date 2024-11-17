@@ -14,7 +14,7 @@ const MessageList = ({ messages }: Props) => {
           key={message.id}
           className={cn("flex", {
             "justify-end pl-10": message.role === "user",
-            "justify-start pr-10": message.role === "system",
+            "justify-start pr-10": message.role === "assistant",
           })}
         >
           <div
@@ -22,6 +22,7 @@ const MessageList = ({ messages }: Props) => {
               "rounded-lg px-3 text-sm py-1 shadow-sm ring-1 ring-gray-900/10",
               {
                 "bg-blue-600 text-white": message.role === "user",
+                "bg-gray-100": message.role === "assistant",
               }
             )}
           >

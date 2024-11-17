@@ -2,19 +2,34 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { db } from "@/lib/db";
 import { chats, messages as _messages } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getContext } from "@/lib/context";
+import { getAuth } from "@clerk/nextjs/server";
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const { userId } = await getAuth(request);
+
+  if (!userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
-    const { messages, chatId } = await request.json();
+    const body = await request.json();
+    const { messages, chatId } = body;
+
+    // Validate that chat exists and belongs to user
     const _chats = await db.select().from(chats).where(eq(chats.id, chatId));
-    if (_chats.length != 1) {
+    if (_chats.length !== 1) {
       return NextResponse.json({ error: "chat not found" }, { status: 404 });
     }
-    const fileKey = _chats[0].fileKey;
+    const chat = _chats[0];
+
+    if (chat.userId !== userId) {
+      return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    }
+
     const lastMessage = messages[messages.length - 1];
-    const context = await getContext(lastMessage.content, fileKey);
+    const context = await getContext(lastMessage.content, chat.fileKey);
 
     const model = new GoogleGenerativeAI(
       process.env.GOOGLE_API_KEY!
@@ -44,20 +59,28 @@ export async function POST(request: Request) {
 
     // Process the stream
     const encoder = new TextEncoder();
+    let aiResponse = "";
+
     for await (const chunk of result.stream) {
       const text = chunk.text();
-      await writer.write(encoder.encode(text));
-    }
-    writer.close();
+      aiResponse += text;
 
-    // Save AI message after stream completes
-    const response = await result.response.text();
+      // Write the chunk to the stream
+      await writer.write(
+        encoder.encode(
+          `data: ${JSON.stringify({ role: "assistant", content: text })}\n\n`
+        )
+      );
+    }
+
+    // Save AI response to database
     await db.insert(_messages).values({
       chatId,
-      content: response,
-      role: "system",
+      content: aiResponse,
+      role: "assistant",
     });
 
+    await writer.close();
     return new Response(stream.readable, {
       headers: {
         "Content-Type": "text/event-stream",

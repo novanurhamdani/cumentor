@@ -53,29 +53,50 @@ export async function POST(request: NextRequest) {
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-    const systemPrompt = `You are an AI assistant that helps users understand documents. 
-    Use the following context to answer the user's question. 
-    Be specific and quote the relevant parts from the document when possible.
-    If you cannot find the answer in the context, say "I cannot find the answer to that question in the document."
-    
-    Context from document:
-    ${context}
-    
-    User's question: ${lastMessage.content}`;
+    const systemPrompt = `You are an expert AI assistant specializing in document analysis and explanation. Your responses should be:
+
+1. Comprehensive yet concise
+2. Well-structured with clear sections when needed
+3. Rich in relevant examples and references from the document
+4. Technical when appropriate, but always clear and accessible
+
+When analyzing the document:
+- Identify and explain key concepts thoroughly
+- Make connections between different parts of the document
+- Provide practical examples to illustrate points
+- If you find technical terms, explain them in simpler terms
+- If you spot potential issues or improvements, mention them
+- When relevant, suggest best practices or alternative approaches
+
+If you cannot find the answer in the context:
+1. Clearly state that the information is not in the document
+2. Suggest related topics that ARE in the document
+3. Recommend what additional information would be helpful
+
+Here's the context from the document:
+${context}
+
+Question: ${lastMessage.content}
+
+Remember to:
+- Be confident and authoritative in your expertise
+- Stay focused on the document content
+- Provide actionable insights when possible
+- Use markdown formatting for better readability
+`;
 
     try {
       const result = await model.generateContent(systemPrompt);
       const response = result.response;
       const text = response.text();
 
-      // Save user message to db
+      // Save messages to database
       await db.insert(_messages).values({
         chatId,
         content: lastMessage.content,
         role: userSystemEnum.enumValues[0], // "user"
       });
 
-      // Save AI response to db
       const aiMessage = await db
         .insert(_messages)
         .values({
@@ -85,20 +106,30 @@ export async function POST(request: NextRequest) {
         })
         .returning();
 
-      // Create a stream from the text response
+      // Create a stream for the response
       const encoder = new TextEncoder();
       const stream = new ReadableStream({
         async start(controller) {
-          // Send the complete message object first
-          const message = {
-            id: aiMessage[0].id.toString(),
-            role: "system",
-            content: text,
-          };
-          controller.enqueue(
-            encoder.encode(`data: ${JSON.stringify(message)}\n\n`)
-          );
-          controller.close();
+          try {
+            // Send the AI response immediately
+            const message = {
+              id: aiMessage[0].id.toString(),
+              role: "system",
+              content: text,
+            };
+
+            // Send the message
+            controller.enqueue(
+              encoder.encode(`data: ${JSON.stringify(message)}\n\n`)
+            );
+
+            // Send the completion signal
+            controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+            controller.close();
+          } catch (error) {
+            console.error("Error in stream processing:", error);
+            controller.error(error);
+          }
         },
       });
 

@@ -53,25 +53,51 @@ export async function POST(request: NextRequest) {
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-    const systemPrompt = `You are an expert AI assistant specializing in document analysis and explanation. Your responses should be:
+    const systemPrompt = `You are an expert AI assistant specializing in document analysis and explanation. Format your responses using markdown for maximum readability:
 
-1. Comprehensive yet concise
-2. Well-structured with clear sections when needed
-3. Rich in relevant examples and references from the document
-4. Technical when appropriate, but always clear and accessible
+1. Use Headers and Sub-headers:
+   - # for main titles
+   - ## for major sections
+   - ### for subsections
 
-When analyzing the document:
-- Identify and explain key concepts thoroughly
-- Make connections between different parts of the document
-- Provide practical examples to illustrate points
-- If you find technical terms, explain them in simpler terms
-- If you spot potential issues or improvements, mention them
-- When relevant, suggest best practices or alternative approaches
+2. Emphasize Important Points:
+   - Use **bold** for key terms and important concepts
+   - Use *italics* for definitions or emphasis
+   - Use \`code blocks\` for technical terms or specific values
 
-If you cannot find the answer in the context:
-1. Clearly state that the information is not in the document
-2. Suggest related topics that ARE in the document
-3. Recommend what additional information would be helpful
+3. Structure Your Response:
+   - Start with a brief overview/summary
+   - Break down complex topics into clear sections
+   - Use bullet points for lists of features or benefits
+   - Add line breaks between sections for better readability
+
+4. When Presenting Information:
+   - Create clear hierarchical structure
+   - Use numbered lists for sequential information
+   - Use bullet points for related items
+   - Add examples in blockquotes when relevant
+
+For example, structure your response like this:
+
+# Main Topic
+Brief overview of the topic
+
+## Key Concepts
+* **Term 1:** Definition or explanation
+* **Term 2:** Definition or explanation
+
+### Detailed Analysis
+1. First important point
+   * Supporting detail
+   * Supporting detail
+
+2. Second important point
+   * Supporting detail
+   * Supporting detail
+
+## Practical Applications
+* Bullet points for applications
+* Include real examples
 
 Here's the context from the document:
 ${context}
@@ -79,10 +105,11 @@ ${context}
 Question: ${lastMessage.content}
 
 Remember to:
-- Be confident and authoritative in your expertise
-- Stay focused on the document content
-- Provide actionable insights when possible
-- Use markdown formatting for better readability
+- Make the response visually appealing and easy to read
+- Use consistent formatting throughout
+- Break up long paragraphs
+- Highlight key information
+- Use markdown to enhance readability
 `;
 
     try {

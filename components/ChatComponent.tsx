@@ -85,9 +85,11 @@ const ChatComponent = ({ chatId }: ChatComponentProps) => {
                   } else {
                     try {
                       const message = JSON.parse(data);
-                      setAllMessages(prev => {
+                      setAllMessages((prev) => {
                         // Find if we already have this message
-                        const existingIndex = prev.findIndex(m => m.id === message.id);
+                        const existingIndex = prev.findIndex(
+                          (m) => m.id === message.id
+                        );
                         if (existingIndex >= 0) {
                           // Update existing message
                           const newMessages = [...prev];
@@ -135,8 +137,8 @@ const ChatComponent = ({ chatId }: ChatComponentProps) => {
         content: input.trim(),
         createdAt: new Date(),
       };
-      setAllMessages(prev => [...prev, userMessage]);
-      
+      setAllMessages((prev) => [...prev, userMessage]);
+
       await originalHandleSubmit(e);
     } catch (error) {
       console.error("Error sending message:", error);
@@ -171,7 +173,7 @@ const ChatComponent = ({ chatId }: ChatComponentProps) => {
             value={input}
             onChange={handleInputChange}
             placeholder="Ask me anything..."
-            className="w-full"
+            className="w-full mr-2"
             disabled={isLoading}
           />
           <Button type="submit" disabled={isLoading}>

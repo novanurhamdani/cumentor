@@ -1,8 +1,8 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { db } from "@/lib/db";
-import { chats, messages as _messages } from "@/lib/db/schema";
+import { chats, messages as _messages, userSystemEnum } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { getContext } from "@/lib/context";
 import { getAuth } from "@clerk/nextjs/server";
 
@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
   const { userId } = await getAuth(request);
 
   if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return new Response("Unauthorized", { status: 401 });
   }
 
   try {
@@ -19,24 +19,43 @@ export async function POST(request: NextRequest) {
 
     // Validate that chat exists and belongs to user
     const _chats = await db.select().from(chats).where(eq(chats.id, chatId));
+
     if (_chats.length !== 1) {
-      return NextResponse.json({ error: "chat not found" }, { status: 404 });
+      return new Response("Chat not found", { status: 404 });
     }
     const chat = _chats[0];
 
     if (chat.userId !== userId) {
-      return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+      return new Response("Unauthorized", { status: 401 });
+    }
+
+    // If this is the first load (no messages), get previous messages from db
+    if (!messages || messages.length === 0) {
+      const previousMessages = await db
+        .select()
+        .from(_messages)
+        .where(eq(_messages.chatId, chatId))
+        .orderBy(_messages.createdAt);
+
+      const formattedMessages = previousMessages.map((msg) => ({
+        id: msg.id.toString(),
+        role: msg.role as "user" | "assistant",
+        content: msg.content,
+      }));
+
+      return new Response(JSON.stringify({ messages: formattedMessages }));
     }
 
     const lastMessage = messages[messages.length - 1];
+
     const context = await getContext(lastMessage.content, chat.fileKey);
 
-    const model = new GoogleGenerativeAI(
-      process.env.GOOGLE_API_KEY!
-    ).getGenerativeModel({ model: "gemini-pro" });
+    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
     const systemPrompt = `You are an AI assistant that helps users understand documents. 
     Use the following context to answer the user's question. 
+    Be specific and quote the relevant parts from the document when possible.
     If you cannot find the answer in the context, say "I cannot find the answer to that question in the document."
     
     Context from document:
@@ -44,55 +63,66 @@ export async function POST(request: NextRequest) {
     
     User's question: ${lastMessage.content}`;
 
-    const result = await model.generateContentStream(systemPrompt);
+    try {
+      const result = await model.generateContent(systemPrompt);
+      const response = result.response;
+      const text = response.text();
 
-    // Save user message into db
-    await db.insert(_messages).values({
-      chatId,
-      content: lastMessage.content,
-      role: "user",
-    });
+      // Save user message to db
+      await db.insert(_messages).values({
+        chatId,
+        content: lastMessage.content,
+        role: userSystemEnum.enumValues[0], // "user"
+      });
 
-    // Create a TransformStream for streaming the response
-    const stream = new TransformStream();
-    const writer = stream.writable.getWriter();
+      // Save AI response to db
+      const aiMessage = await db
+        .insert(_messages)
+        .values({
+          chatId,
+          content: text,
+          role: userSystemEnum.enumValues[1], // "system"
+        })
+        .returning();
 
-    // Process the stream
-    const encoder = new TextEncoder();
-    let aiResponse = "";
+      // Create a stream from the text response
+      const encoder = new TextEncoder();
+      const stream = new ReadableStream({
+        async start(controller) {
+          // Send the complete message object first
+          const message = {
+            id: aiMessage[0].id.toString(),
+            role: "system",
+            content: text,
+          };
+          controller.enqueue(
+            encoder.encode(`data: ${JSON.stringify(message)}\n\n`)
+          );
+          controller.close();
+        },
+      });
 
-    for await (const chunk of result.stream) {
-      const text = chunk.text();
-      aiResponse += text;
-
-      // Write the chunk to the stream
-      await writer.write(
-        encoder.encode(
-          `data: ${JSON.stringify({ role: "assistant", content: text })}\n\n`
-        )
-      );
+      return new Response(stream, {
+        headers: {
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache",
+          Connection: "keep-alive",
+        },
+      });
+    } catch (geminiError) {
+      return new Response(JSON.stringify({ error: geminiError }), {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
     }
-
-    // Save AI response to database
-    await db.insert(_messages).values({
-      chatId,
-      content: aiResponse,
-      role: "assistant",
-    });
-
-    await writer.close();
-    return new Response(stream.readable, {
+  } catch (error) {
+    return new Response(JSON.stringify({ error: error }), {
+      status: 500,
       headers: {
-        "Content-Type": "text/event-stream",
-        "Cache-Control": "no-cache",
-        Connection: "keep-alive",
+        "Content-Type": "application/json",
       },
     });
-  } catch (error) {
-    console.error("Error in chat:", error);
-    return NextResponse.json(
-      { error: "Something went wrong" },
-      { status: 500 }
-    );
   }
 }

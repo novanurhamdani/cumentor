@@ -28,8 +28,9 @@ export async function getContext(query: string, fileKey: string) {
   const queryEmbeddings = await getEmbeddings(query);
   const matches = await getMatchesFromEmbeddings(queryEmbeddings, fileKey);
 
+  // Menurunkan threshold score dari 0.7 ke 0.5
   const qualifyingDocs = matches.filter(
-    (match) => match.score && match.score > 0.7
+    (match) => match.score && match.score > 0.5
   );
 
   type Metadata = {
@@ -38,6 +39,6 @@ export async function getContext(query: string, fileKey: string) {
   };
 
   let docs = qualifyingDocs.map((match) => (match.metadata as Metadata).text);
-  // 5 vectors
-  return docs.join("\n").substring(0, 3000);
+  const context = docs.join("\n").substring(0, 3000);
+  return context;
 }

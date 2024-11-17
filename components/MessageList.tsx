@@ -4,9 +4,10 @@ import React from "react";
 
 type Props = {
   messages: Message[];
+  isLoading?: boolean;
 };
 
-const MessageList = ({ messages }: Props) => {
+const MessageList = ({ messages, isLoading }: Props) => {
   return (
     <div className="flex flex-col gap-2 px-4">
       {messages.map((message) => (
@@ -14,7 +15,7 @@ const MessageList = ({ messages }: Props) => {
           key={message.id}
           className={cn("flex", {
             "justify-end pl-10": message.role === "user",
-            "justify-start pr-10": message.role === "assistant",
+            "justify-start pr-10": message.role === "system",
           })}
         >
           <div
@@ -22,7 +23,7 @@ const MessageList = ({ messages }: Props) => {
               "rounded-lg px-3 text-sm py-1 shadow-sm ring-1 ring-gray-900/10",
               {
                 "bg-blue-600 text-white": message.role === "user",
-                "bg-gray-100": message.role === "assistant",
+                "bg-gray-100": message.role === "system",
               }
             )}
           >
@@ -30,6 +31,17 @@ const MessageList = ({ messages }: Props) => {
           </div>
         </div>
       ))}
+      {isLoading && (
+        <div className="flex justify-start pr-10">
+          <div className="bg-gray-100 rounded-lg px-3 text-sm py-1 shadow-sm ring-1 ring-gray-900/10">
+            <div className="typing-indicator">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -8,7 +8,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
-export const userSystemEnum = pgEnum("user_system_enum", ["user", "assistant"]);
+export const userSystemEnum = pgEnum("user_system_enum", ["user", "system"]);
 
 export const chats = pgTable("chats", {
   id: serial("id").primaryKey(),

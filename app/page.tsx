@@ -30,15 +30,17 @@ export default async function Home() {
 
           <div className="flex mt-2">
             {isAuthenticated && firstChat ? (
-              <Link href={`/chat/${firstChat.id}`}>
-                <Button className="bg-secondary hover:bg-secondary/90 py-6 font-semibold">
-                  Go to Chats <ArrowRight className="ml-2" />
-                </Button>
-              </Link>
+              <>
+                <Link href={`/chat/${firstChat.id}`}>
+                  <Button className="bg-secondary hover:bg-secondary/90 py-6 font-semibold">
+                    Go to Chats <ArrowRight className="ml-2" />
+                  </Button>
+                </Link>
+                <div className="ml-2">
+                  <SubscriptionButton isPro={isPro} />
+                </div>
+              </>
             ) : null}
-            <div className="ml-2">
-              <SubscriptionButton isPro={isPro} />
-            </div>
           </div>
 
           <p className="max-w-xl mt-1 text-lg text-secondary">

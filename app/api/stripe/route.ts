@@ -23,15 +23,15 @@ export async function GET() {
       // Try to cancel the subscription
       const stripeSession = await stripe.billingPortal.sessions.create({
         customer: _userSubscriptions[0].stripeCustomerId,
-        return_url: process.env.NEXT_PUBLIC_STRIPE_RETURN_URL,
+        return_url: process.env.NEXT_PUBLIC_URL,
       });
       return NextResponse.json({ url: stripeSession.url });
     }
 
     // User first time subscription
     const stripeSession = await stripe.checkout.sessions.create({
-      success_url: process.env.NEXT_PUBLIC_STRIPE_RETURN_URL,
-      cancel_url: process.env.NEXT_PUBLIC_STRIPE_RETURN_URL,
+      success_url: process.env.NEXT_PUBLIC_URL,
+      cancel_url: process.env.NEXT_PUBLIC_URL,
       payment_method_types: ["card"],
       mode: "subscription",
       billing_address_collection: "auto",

@@ -155,43 +155,50 @@ const ChatComponent = ({ chatId }: ChatComponentProps) => {
   }, [allMessages, isLoading]);
 
   return (
-    <div className="relative max-h-screen overflow-scroll">
+    <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="sticky top-0 inset-x-0 p-2 bg-popover text-white h-fit">
-        <h3 className="text-xl font-bold">Chat</h3>
+      <div className="flex-none border-b border-primary/10">
+        <div className="px-4 py-3 bg-popover text-white">
+          <h3 className="text-xl font-bold">Chat</h3>
+        </div>
       </div>
 
       {/* Message List */}
-      <div className="space-y-4 w-full">
-        <MessageList
-          messages={allMessages}
-          isLoading={isLoading}
-          isFetching={isFetching}
-        />
-        <div ref={messagesEndRef} />
+      <div className="flex-1 overflow-y-auto">
+        <div className="space-y-4 w-full p-4">
+          <MessageList
+            messages={allMessages}
+            isLoading={isLoading}
+            isFetching={isFetching}
+          />
+          <div ref={messagesEndRef} />
+        </div>
       </div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="sticky bottom-0 inset-x-0 px-2 py-4 text-white bg-card"
-      >
-        <div className="flex">
-          <Input
-            value={input}
-            onChange={handleInputChange}
-            placeholder="Ask me anything..."
-            className="w-full mr-2 bg-muted text-white focus:ring-primary"
-            disabled={isLoading}
-          />
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="bg-primary text-white hover:bg-primary/90"
-          >
-            <Send className="h-4 w-4" />
-          </Button>
-        </div>
-      </form>
+      {/* Input Form */}
+      <div className="flex-none border-t border-primary/10">
+        <form
+          onSubmit={handleSubmit}
+          className="px-4 py-4 bg-card text-white"
+        >
+          <div className="flex">
+            <Input
+              value={input}
+              onChange={handleInputChange}
+              placeholder="Ask me anything..."
+              className="w-full mr-2 bg-muted text-white focus:ring-primary"
+              disabled={isLoading}
+            />
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="bg-primary text-white hover:bg-primary/90"
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

@@ -5,78 +5,70 @@ import React, { useState } from "react";
 import { PlusCircleIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { Button } from "./ui/button";
 import axios from "axios";
+import SubscriptionButton from "./SubscriptionButton";
 
 type Props = {
   chats: DrizzleChat[];
   chatId: number;
+  isPro: boolean;
 };
 
-const ChatSidebar = ({ chats, chatId }: Props) => {
+const ChatSidebar = ({ chats, chatId, isPro }: Props) => {
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubsciption = async () => {
-    try {
-      setIsLoading(true);
-      const response = await axios.get("/api/stripe");
-      const { url } = await response.data;
-
-      window.location.href = url;
-    } catch (error) {
-      console.error("Error in subscription:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
-    <div className="h-screen bg-muted p-4 text-muted-foreground relative">
-      <div className="mb-4">
-        <Link
-          href="/"
-          className="w-full flex items-center justify-center border-dashed border-primary border px-4 py-2 bg-transparent text-primary rounded-lg hover:bg-primary/90 hover:text-white transition-colors"
-        >
-          <PlusCircleIcon className="w-4 h-4 mr-2" />
-          New Chat
-        </Link>
-      </div>
-
-      <div className="space-y-2">
-        {chats.map((chat) => (
+    <div className="h-screen p-4 text-muted-foreground bg-muted flex flex-col">
+      <div className="flex-1 overflow-y-auto">
+        <div className="mb-4">
           <Link
-            key={chat.id}
-            href={`/chat/${chat.id}`}
-            className={cn(
-              "block px-4 py-2 rounded-lg hover:bg-primary/80 text-white transition-colors",
-              {
-                "bg-primary": chat.id === chatId,
-              }
-            )}
+            href="/"
+            className="text-2xl font-bold hover:text-slate-200 transition-colors"
           >
-            <div className="text-sm font-semibold truncate">
-              {chat.pdfName || "Untitled Chat"}
-            </div>
-            <div className="text-xs opacity-60 truncate">
-              {format(new Date(chat.createdAt), "d MMMM yyyy")}
-            </div>
+            Cumentor
           </Link>
-        ))}
+        </div>
+
+        <div className="mb-4">
+          <Link
+            href="/"
+            className="w-full flex items-center justify-center border-dashed border-primary border px-4 py-2 bg-transparent text-primary rounded-lg hover:bg-primary/90 hover:text-white transition-colors"
+          >
+            <PlusCircleIcon className="w-4 h-4 mr-2" />
+            New Chat
+          </Link>
+        </div>
+
+        <div className="space-y-2">
+          {chats.map((chat) => (
+            <Link key={chat.id} href={`/chat/${chat.id}`}>
+              <div
+                className={cn("rounded-lg p-3 text-slate-200 flex items-center", {
+                  "bg-primary/10": chat.id === chatId,
+                  "hover:bg-primary/10": chat.id !== chatId,
+                })}
+              >
+                <div className="flex gap-2 items-center max-w-[230px]">
+                  <div className="relative w-2 h-2 rounded-full bg-sky-600"></div>
+                  <span className="truncate flex-1 text-sm">
+                    {chat.pdfName}
+                  </span>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
       </div>
 
-      <div className="absolute bottom-4 right-4 left-4">
+      <div className="sticky bottom-0 bg-muted py-4">
         <div className="flex gap-2 text-sm text-slate-200 flex-wrap">
           <Link href="/">Home</Link>
           <Link href="/source">Source</Link>
         </div>
 
-        <Button
-          className="w-full mt-2 text-white bg-primary hover:bg-primary/90 py-6 font-semibold text-md"
-          onClick={handleSubsciption}
-          disabled={isLoading}
-        >
-          Upgrade to Pro
-        </Button>
+        <div className="mt-4">
+          <SubscriptionButton isPro={isPro} />
+        </div>
       </div>
     </div>
   );

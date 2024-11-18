@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { db } from "@/lib/db";
-import { chats, messages as _messages, userSystemEnum } from "@/lib/db/schema";
+import { chats, messages, userSystemEnum } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { NextRequest } from "next/server";
 import { getContext } from "@/lib/context";
@@ -15,27 +15,30 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { messages, chatId } = body;
+    const { messages: incomingMessages, chatId } = body;
 
     // Validate that chat exists and belongs to user
-    const _chats = await db.select().from(chats).where(eq(chats.id, chatId));
+    const existingChats = await db
+      .select()
+      .from(chats)
+      .where(eq(chats.id, chatId));
 
-    if (_chats.length !== 1) {
+    if (existingChats.length !== 1) {
       return new Response("Chat not found", { status: 404 });
     }
-    const chat = _chats[0];
+    const chat = existingChats[0];
 
     if (chat.userId !== userId) {
       return new Response("Unauthorized", { status: 401 });
     }
 
     // If this is the first load (no messages), get previous messages from db
-    if (!messages || messages.length === 0) {
+    if (!incomingMessages || incomingMessages.length === 0) {
       const previousMessages = await db
         .select()
-        .from(_messages)
-        .where(eq(_messages.chatId, chatId))
-        .orderBy(_messages.createdAt);
+        .from(messages)
+        .where(eq(messages.chatId, chatId))
+        .orderBy(messages.createdAt);
 
       const formattedMessages = previousMessages.map((msg) => ({
         id: msg.id.toString(),
@@ -46,11 +49,15 @@ export async function POST(request: NextRequest) {
       return new Response(JSON.stringify({ messages: formattedMessages }));
     }
 
-    const lastMessage = messages[messages.length - 1];
-
+    const lastMessage = incomingMessages[incomingMessages.length - 1];
     const context = await getContext(lastMessage.content, chat.fileKey);
+    const apiKey = process.env.GOOGLE_API_KEY;
 
-    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
+    if (!apiKey) {
+      throw new Error("Google API key is not configured");
+    }
+
+    const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
     const systemPrompt = `You are an expert AI assistant specializing in document analysis and explanation.
@@ -76,14 +83,14 @@ export async function POST(request: NextRequest) {
       const text = response.text();
 
       // Save messages to database
-      await db.insert(_messages).values({
+      await db.insert(messages).values({
         chatId,
         content: lastMessage.content,
         role: userSystemEnum.enumValues[0], // "user"
       });
 
       const aiMessage = await db
-        .insert(_messages)
+        .insert(messages)
         .values({
           chatId,
           content: text,

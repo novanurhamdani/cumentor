@@ -41,7 +41,7 @@ export default async function Home() {
             </div>
           </div>
 
-          <p className="max-w-xl mt-1 text-lg text-slate-600">
+          <p className="max-w-xl mt-1 text-lg text-secondary">
             The AI-powered document assistant for students, researchers, and
             professionals. Scan, query, and explore PDFs effortlessly to uncover
             insights, streamline research, and boost productivity.

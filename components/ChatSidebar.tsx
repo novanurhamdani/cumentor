@@ -1,10 +1,12 @@
 "use client";
 import { DrizzleChat } from "@/lib/db/schema";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 import { PlusCircleIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { Button } from "./ui/button";
+import axios from "axios";
 
 type Props = {
   chats: DrizzleChat[];
@@ -12,8 +14,24 @@ type Props = {
 };
 
 const ChatSidebar = ({ chats, chatId }: Props) => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubsciption = async () => {
+    try {
+      setIsLoading(true);
+      const response = await axios.get("/api/stripe");
+      const { url } = await response.data;
+
+      window.location.href = url;
+    } catch (error) {
+      console.error("Error in subscription:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <div className="h-screen bg-muted p-4 text-muted-foreground">
+    <div className="h-screen bg-muted p-4 text-muted-foreground relative">
       <div className="mb-4">
         <Link
           href="/"
@@ -36,22 +54,29 @@ const ChatSidebar = ({ chats, chatId }: Props) => {
               }
             )}
           >
-            <div className="text-sm font-medium truncate">
+            <div className="text-sm font-semibold truncate">
               {chat.pdfName || "Untitled Chat"}
             </div>
-            <div className="text-xs opacity-70 truncate">
+            <div className="text-xs opacity-60 truncate">
               {format(new Date(chat.createdAt), "d MMMM yyyy")}
             </div>
           </Link>
         ))}
       </div>
 
-      <div className="absolute bottom-4 left-4">
+      <div className="absolute bottom-4 right-4 left-4">
         <div className="flex gap-2 text-sm text-slate-200 flex-wrap">
           <Link href="/">Home</Link>
           <Link href="/source">Source</Link>
-          {/* Stripe Button */}
         </div>
+
+        <Button
+          className="w-full mt-2 text-white bg-primary hover:bg-primary/90 py-6 font-semibold text-md"
+          onClick={handleSubsciption}
+          disabled={isLoading}
+        >
+          Upgrade to Pro
+        </Button>
       </div>
     </div>
   );

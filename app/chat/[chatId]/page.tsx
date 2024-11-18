@@ -41,7 +41,7 @@ export default async function Page({
           <PdfViewer pdfUrl={currentChat.pdfUrl || ""} />
         </div>
         {/* Chat component */}
-        <div className="flex-[3] border-l-4 border-l-slate-200">
+        <div className="flex-[3] border-l-4 border-l-secondary p-4">
           <ChatComponent chatId={parseInt(chatId)} />
         </div>
       </div>

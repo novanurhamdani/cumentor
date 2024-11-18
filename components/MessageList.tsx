@@ -57,9 +57,9 @@ const MessageList = ({ messages, isLoading, isFetching }: Props) => {
           >
             <div className="flex items-center gap-2">
               <span
-                className={cn("text-sm", {
+                className={cn("text-sm font-semibold", {
                   "text-white": message.role === "user",
-                  "text-muted-foreground": message.role === "system",
+                  "text-white/80": message.role === "system",
                 })}
               >
                 {message.role === "user" ? "You" : "Cumentor AI"}
@@ -67,7 +67,7 @@ const MessageList = ({ messages, isLoading, isFetching }: Props) => {
               <span
                 className={cn("text-xs opacity-50", {
                   "text-white": message.role === "user",
-                  "text-muted-foreground": message.role === "system",
+                  "text-white/80": message.role === "system",
                 })}
               >
                 {message.createdAt

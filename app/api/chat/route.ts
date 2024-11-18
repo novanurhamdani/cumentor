@@ -44,6 +44,7 @@ export async function POST(request: NextRequest) {
         id: msg.id.toString(),
         role: msg.role as "user" | "assistant",
         content: msg.content,
+        createdAt: msg.createdAt.toISOString(),
       }));
 
       return new Response(JSON.stringify({ messages: formattedMessages }));
@@ -108,6 +109,7 @@ export async function POST(request: NextRequest) {
               id: aiMessage[0].id.toString(),
               role: "system",
               content: text,
+              createdAt: aiMessage[0].createdAt.toISOString(),
             };
 
             // Send the message

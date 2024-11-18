@@ -4,6 +4,7 @@ import React from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Loader2 } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
 
 type Props = {
   messages: Message[];
@@ -54,6 +55,28 @@ const MessageList = ({ messages, isLoading, isFetching }: Props) => {
               }
             )}
           >
+            <div className="flex items-center gap-2">
+              <span
+                className={cn("text-sm", {
+                  "text-white": message.role === "user",
+                  "text-muted-foreground": message.role === "system",
+                })}
+              >
+                {message.role === "user" ? "You" : "Cumentor AI"}
+              </span>
+              <span
+                className={cn("text-xs opacity-50", {
+                  "text-white": message.role === "user",
+                  "text-muted-foreground": message.role === "system",
+                })}
+              >
+                {message.createdAt
+                  ? formatDistanceToNow(new Date(message.createdAt), {
+                      addSuffix: true,
+                    })
+                  : "just now"}
+              </span>
+            </div>
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
@@ -97,6 +120,10 @@ const MessageList = ({ messages, isLoading, isFetching }: Props) => {
                   />
                 ),
               }}
+              className={cn("prose", {
+                "text-white": message.role === "user",
+                "text-foreground": message.role === "system",
+              })}
             >
               {message.content}
             </ReactMarkdown>

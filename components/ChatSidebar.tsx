@@ -4,6 +4,7 @@ import Link from "next/link";
 import React from "react";
 import { PlusCircleIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
 type Props = {
   chats: DrizzleChat[];
@@ -39,7 +40,7 @@ const ChatSidebar = ({ chats, chatId }: Props) => {
               {chat.pdfName || "Untitled Chat"}
             </div>
             <div className="text-xs opacity-70 truncate">
-              {new Date(chat.createdAt).toLocaleDateString()}
+              {format(new Date(chat.createdAt), "d MMMM yyyy")}
             </div>
           </Link>
         ))}

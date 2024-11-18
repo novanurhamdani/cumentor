@@ -172,13 +172,13 @@ const ChatComponent = ({ chatId }: ChatComponentProps) => {
             value={input}
             onChange={handleInputChange}
             placeholder="Ask me anything..."
-            className="w-full mr-2 bg-muted text-muted-foreground focus:ring-primary"
+            className="w-full mr-2 bg-muted text-white focus:ring-primary"
             disabled={isLoading}
           />
           <Button
             type="submit"
             disabled={isLoading}
-            className="bg-primary text-primary-foreground hover:bg-primary/90"
+            className="bg-primary text-white hover:bg-primary/90"
           >
             <Send className="h-4 w-4" />
           </Button>

@@ -3,6 +3,7 @@ import { Message } from "ai/react";
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { Loader2 } from "lucide-react";
 
 type Props = {
   messages: Message[];
@@ -10,8 +11,17 @@ type Props = {
 };
 
 const MessageList = ({ messages, isLoading }: Props) => {
+  if (!messages || messages.length === 0) {
+    return (
+      <div className="flex flex-col gap-2 px-4 bg-popover min-h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-muted-foreground text-sm">Loading messages...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col gap-2 px-4 bg-popover">
+    <div className="flex flex-col gap-2 px-4 bg-popover min-h-screen">
       {messages.map((message) => (
         <div
           key={message.id}
@@ -34,7 +44,6 @@ const MessageList = ({ messages, isLoading }: Props) => {
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
-                // Override default element styling
                 h1: ({ node, ...props }) => (
                   <h1 className="text-lg font-bold mb-2" {...props} />
                 ),
@@ -82,7 +91,7 @@ const MessageList = ({ messages, isLoading }: Props) => {
       ))}
       {isLoading && (
         <div className="flex justify-start pr-10">
-          <div className="bg-gray-100 rounded-lg px-3 text-sm py-1 shadow-sm ring-1 ring-gray-900/10">
+          <div className="bg-secondary text-white rounded-lg px-3 text-sm py-1 shadow-sm ring-1 ring-gray-900/10">
             <div className="typing-indicator">
               <span></span>
               <span></span>

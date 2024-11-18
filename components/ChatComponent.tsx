@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { Input } from "./ui/input";
 import { useChat } from "ai/react";
 import { Button } from "./ui/button";
-import { Send } from "lucide-react";
+import { HistoryIcon, Send } from "lucide-react";
 import MessageList from "./MessageList";
 import { Message } from "ai";
 
@@ -158,8 +158,9 @@ const ChatComponent = ({ chatId }: ChatComponentProps) => {
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="flex-none border-b border-primary/10">
-        <div className="px-4 py-3 bg-popover text-white">
-          <h3 className="text-xl font-bold">Chat</h3>
+        <div className="px-4 py-3 bg-popover text-white flex items-center">
+          <HistoryIcon />
+          <h3 className="text-xl font-bold ml-2">Chat History</h3>
         </div>
       </div>
 
@@ -177,10 +178,7 @@ const ChatComponent = ({ chatId }: ChatComponentProps) => {
 
       {/* Input Form */}
       <div className="flex-none border-t border-primary/10">
-        <form
-          onSubmit={handleSubmit}
-          className="px-4 py-4 bg-card text-white"
-        >
+        <form onSubmit={handleSubmit} className="px-4 py-4 bg-card text-white">
           <div className="flex">
             <Input
               value={input}

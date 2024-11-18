@@ -27,7 +27,7 @@ const MessageList = ({ messages, isLoading, isFetching }: Props) => {
   if (!messages || messages.length === 0) {
     return (
       <div className="flex flex-col gap-2 px-4 bg-popover min-h-screen items-center justify-center">
-        <p className="text-muted-foreground text-sm">
+        <p className="text-primary text-sm">
           No messages yet. Start a conversation!
         </p>
       </div>
@@ -58,14 +58,14 @@ const MessageList = ({ messages, isLoading, isFetching }: Props) => {
             <div className="flex items-center gap-2">
               <span
                 className={cn("text-sm font-semibold", {
-                  "text-white": message.role === "user",
-                  "text-white/80": message.role === "system",
+                  "text-secondary": message.role === "user",
+                  "text-primary": message.role === "system",
                 })}
               >
                 {message.role === "user" ? "You" : "Cumentor AI"}
               </span>
               <span
-                className={cn("text-xs opacity-50", {
+                className={cn("text-xs opacity-70", {
                   "text-white": message.role === "user",
                   "text-white/80": message.role === "system",
                 })}

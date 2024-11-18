@@ -13,6 +13,7 @@ interface ChatComponentProps {
 
 const ChatComponent = ({ chatId }: ChatComponentProps) => {
   const [initialMessages, setInitialMessages] = useState<Message[]>([]);
+  const [isFetching, setIsFetching] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [allMessages, setAllMessages] = useState<Message[]>([]);
@@ -24,13 +25,14 @@ const ChatComponent = ({ chatId }: ChatComponentProps) => {
   useEffect(() => {
     // Fetch initial messages when component mounts
     const fetchMessages = async () => {
+      setIsFetching(true);
       try {
         const response = await fetch("/api/chat", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ chatId, messages: [] }),
+          body: JSON.stringify({ chatId }),
         });
         const data = await response.json();
         if (data.messages) {
@@ -39,6 +41,8 @@ const ChatComponent = ({ chatId }: ChatComponentProps) => {
         }
       } catch (error) {
         console.error("Error fetching messages:", error);
+      } finally {
+        setIsFetching(false);
       }
     };
 
@@ -159,8 +163,12 @@ const ChatComponent = ({ chatId }: ChatComponentProps) => {
 
       {/* Message List */}
       <div className="space-y-4 w-full">
-        <MessageList messages={allMessages} isLoading={isLoading} />
-        <div ref={messagesEndRef} /> {/* Anchor element for scrolling */}
+        <MessageList
+          messages={allMessages}
+          isLoading={isLoading}
+          isFetching={isFetching}
+        />
+        <div ref={messagesEndRef} />
       </div>
 
       <form

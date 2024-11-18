@@ -8,14 +8,27 @@ import { Loader2 } from "lucide-react";
 type Props = {
   messages: Message[];
   isLoading?: boolean;
+  isFetching?: boolean;
 };
 
-const MessageList = ({ messages, isLoading }: Props) => {
-  if (!messages || messages.length === 0) {
+const MessageList = ({ messages, isLoading, isFetching }: Props) => {
+  // Show loading spinner during initial fetch
+  if (isFetching) {
     return (
       <div className="flex flex-col gap-2 px-4 bg-popover min-h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
         <p className="text-muted-foreground text-sm">Loading messages...</p>
+      </div>
+    );
+  }
+
+  // Show empty state when no messages and not loading
+  if (!messages || messages.length === 0) {
+    return (
+      <div className="flex flex-col gap-2 px-4 bg-popover min-h-screen items-center justify-center">
+        <p className="text-muted-foreground text-sm">
+          No messages yet. Start a conversation!
+        </p>
       </div>
     );
   }
@@ -89,6 +102,7 @@ const MessageList = ({ messages, isLoading }: Props) => {
           </div>
         </div>
       ))}
+      {/* Show typing indicator only when waiting for chat response */}
       {isLoading && (
         <div className="flex justify-start pr-10">
           <div className="bg-secondary text-white rounded-lg px-3 text-sm py-1 shadow-sm ring-1 ring-gray-900/10">

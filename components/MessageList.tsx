@@ -57,27 +57,28 @@ const MessageList = ({ messages, isLoading, isFetching }: Props) => {
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
-                h1: ({ node, ...props }) => (
-                  <h1 className="text-lg font-bold mb-2" {...props} />
+                p: ({ ...props }) => <p className="mb-4" {...props} />,
+                h1: ({ ...props }) => (
+                  <h1 className="text-2xl font-bold mb-4" {...props} />
                 ),
-                h2: ({ node, ...props }) => (
-                  <h2 className="text-base font-semibold mb-2" {...props} />
+                h2: ({ ...props }) => (
+                  <h2 className="text-xl font-bold mb-4" {...props} />
                 ),
-                h3: ({ node, ...props }) => (
-                  <h3 className="text-sm font-medium mb-1" {...props} />
+                h3: ({ ...props }) => (
+                  <h3 className="text-lg font-bold mb-4" {...props} />
                 ),
-                p: ({ node, ...props }) => <p className="mb-1" {...props} />,
-                ul: ({ node, ...props }) => (
-                  <ul className="list-disc ml-4 mb-1" {...props} />
+                h4: ({ ...props }) => (
+                  <h4 className="text-base font-bold mb-4" {...props} />
                 ),
-                ol: ({ node, ...props }) => (
+                ul: ({ ...props }) => (
+                  <ul className="list-disc ml-4 mb-4" {...props} />
+                ),
+                ol: ({ ...props }) => (
                   <ol className="list-decimal ml-4 mb-1" {...props} />
                 ),
-                li: ({ node, ...props }) => (
-                  <li className="mb-0.5" {...props} />
-                ),
-                // @ts-ignore
-                code: ({ node, inline, ...props }) =>
+                li: ({ ...props }) => <li className="mb-0.5" {...props} />,
+                // @ts-expect-error - ReactMarkdown types don't match exactly with our component props
+                code: ({ inline, ...props }) =>
                   inline ? (
                     <code
                       className="bg-black/10 rounded px-1 py-0.5"
@@ -89,7 +90,7 @@ const MessageList = ({ messages, isLoading, isFetching }: Props) => {
                       {...props}
                     />
                   ),
-                blockquote: ({ node, ...props }) => (
+                blockquote: ({ ...props }) => (
                   <blockquote
                     className="border-l-2 border-current pl-2 italic"
                     {...props}

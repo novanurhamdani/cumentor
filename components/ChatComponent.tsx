@@ -46,7 +46,6 @@ const ChatComponent = ({ chatId }: ChatComponentProps) => {
   }, [chatId]);
 
   const {
-    messages: chatMessages,
     input,
     handleInputChange,
     handleSubmit: originalHandleSubmit,
@@ -154,7 +153,7 @@ const ChatComponent = ({ chatId }: ChatComponentProps) => {
   return (
     <div className="relative max-h-screen overflow-scroll">
       {/* Header */}
-      <div className="sticky top-0 inset-x-0 p-2 bg-white h-fit">
+      <div className="sticky top-0 inset-x-0 p-2 bg-popover text-white h-fit">
         <h3 className="text-xl font-bold">Chat</h3>
       </div>
 
@@ -166,17 +165,21 @@ const ChatComponent = ({ chatId }: ChatComponentProps) => {
 
       <form
         onSubmit={handleSubmit}
-        className="sticky bottom-0 inset-x-0 px-2 py-4 bg-white"
+        className="sticky bottom-0 inset-x-0 px-2 py-4 text-white bg-card"
       >
         <div className="flex">
           <Input
             value={input}
             onChange={handleInputChange}
             placeholder="Ask me anything..."
-            className="w-full mr-2"
+            className="w-full mr-2 bg-muted text-muted-foreground focus:ring-primary"
             disabled={isLoading}
           />
-          <Button type="submit" disabled={isLoading}>
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
+          >
             <Send className="h-4 w-4" />
           </Button>
         </div>

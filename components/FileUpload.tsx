@@ -80,12 +80,12 @@ const FileUpload = () => {
         <input {...getInputProps()} />
         {uploading || isPending ? (
           <>
-            <Loader2 className="w-10 h-10 text-teal-600 animate-spin" />
+            <Loader2 className="w-10 h-10 text-primary animate-spin" />
             <p className="mt-2 text-sm text-slate-600">Spilling Tea to GPT</p>
           </>
         ) : (
           <>
-            <Inbox className="w-10 h-10 text-teal-600" />
+            <Inbox className="w-10 h-10 text-primary" />
             <p className="mt-2 text-sm text-slate-600">
               Drop your PDF file here
             </p>

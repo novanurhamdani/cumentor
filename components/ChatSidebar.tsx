@@ -13,27 +13,34 @@ type Props = {
 
 const ChatSidebar = ({ chats, chatId }: Props) => {
   return (
-    <div className="w-full h-screen p-4 text-gray-200 bg-gray-900">
-      <Link href="/">
-        <Button className="w-full border-dashed border-white border bg-transparent">
+    <div className="h-screen bg-muted p-4 text-muted-foreground">
+      <div className="mb-4">
+        <Link
+          href="/"
+          className="w-full flex items-center justify-center border-dashed border-primary border px-4 py-2 bg-transparent text-primary rounded-lg hover:bg-primary/90 hover:text-white transition-colors"
+        >
           <PlusCircleIcon className="w-4 h-4 mr-2" />
           New Chat
-        </Button>
-      </Link>
+        </Link>
+      </div>
 
-      <div className="flex flex-col gap-2 mt-4">
+      <div className="space-y-2">
         {chats.map((chat) => (
-          <Link href={`/chat/${chat.id}`} key={chat.id}>
-            <div
-              className={cn("rounded-lg p-3 text-slate-300 flex items-center", {
-                "bg-blue-600 text-white": chat.id === chatId,
-                "hover:text-white": chat.id !== chatId,
-              })}
-            >
-              <MessageCircle className="w-4 h-4 mr-2" />
-              <p className="truncate text-ellipsis text-sm w-full overflow-hidden whitespace-nowrap">
-                {chat.pdfName}
-              </p>
+          <Link
+            key={chat.id}
+            href={`/chat/${chat.id}`}
+            className={cn(
+              "block px-4 py-2 rounded-lg hover:bg-primary/80 text-white transition-colors",
+              {
+                "bg-primary": chat.id === chatId,
+              }
+            )}
+          >
+            <div className="text-sm font-medium truncate">
+              {chat.pdfName || "Untitled Chat"}
+            </div>
+            <div className="text-xs opacity-70 truncate">
+              {new Date(chat.createdAt).toLocaleDateString()}
             </div>
           </Link>
         ))}

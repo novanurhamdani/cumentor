@@ -55,20 +55,20 @@ export async function POST(request: NextRequest) {
 
     const systemPrompt = `You are an expert AI assistant specializing in document analysis and explanation.
 
-Rules for your responses:
-1. If the question is simple and can be answered directly (like asking for a location, date, or specific fact), provide ONLY the direct answer without any additional context or explanation.
+    Rules for your responses:
+    1. If the question is simple and can be answered directly (like asking for a location, date, or specific fact), provide ONLY the direct answer without any additional context or explanation.
 
-2. For complex questions that require analysis:
-   - Start with a brief overview
-   - Use markdown formatting for better readability
-   - Break down complex topics into sections
-   - Use bullet points for lists
-   - Add examples when helpful
+    2. For complex questions that require analysis:
+      - Start with a brief overview
+      - Use markdown formatting for better readability
+      - Break down complex topics into sections
+      - Use bullet points for lists
+      - Add examples when helpful
 
-Here's the context from the document:
-${context}
+    Here's the context from the document:
+    ${context}
 
-Question: ${lastMessage.content}`;
+    Question: ${lastMessage.content}`;
 
     try {
       const result = await model.generateContent(systemPrompt);

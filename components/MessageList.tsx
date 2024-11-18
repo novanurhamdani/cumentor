@@ -11,7 +11,7 @@ type Props = {
 
 const MessageList = ({ messages, isLoading }: Props) => {
   return (
-    <div className="flex flex-col gap-2 px-4">
+    <div className="flex flex-col gap-2 px-4 bg-popover">
       {messages.map((message) => (
         <div
           key={message.id}
@@ -24,8 +24,10 @@ const MessageList = ({ messages, isLoading }: Props) => {
             className={cn(
               "rounded-lg px-3 py-2 shadow-sm ring-1 ring-gray-900/10 max-w-3xl prose prose-sm",
               {
-                "bg-blue-600 text-white prose-invert": message.role === "user",
-                "bg-gray-100 prose-slate": message.role === "system",
+                "bg-primary text-primary-foreground prose-invert":
+                  message.role === "user",
+                "bg-secondary text-white prose-slate":
+                  message.role === "system",
               }
             )}
           >
